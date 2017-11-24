@@ -5,40 +5,70 @@
     <title>表格导出</title>
     <link rel="stylesheet" href="../../plugins/bootstrap/dist-3.3.7/css/bootstrap.css">
     <link rel="stylesheet" href="../../plugins/bootstrap-table/dist-1.11.1/bootstrap-table.css">
-    <link rel="stylesheet" href="../../plugins/TableExport/dist-5.0.0-rc.11/css/tableexport.css">
+
 
     <script src="../../plugins/jquery/dist-3.2.1/jquery.js"></script>
     <script src="../../plugins/bootstrap/dist-3.3.7/js/bootstrap.js"></script>
     <script src="../../plugins/bootstrap-table/dist-1.11.1/bootstrap-table.js"></script>
     <script src="../../plugins/bootstrap-table/dist-1.11.1/locale/bootstrap-table-zh-CN.js"></script>
-    <script src="../../plugins/js-xlsx/dist-0.11.10/xlsx.core.min.js"></script>
-    <script src="../../plugins/FileSaver/dist-1.3.3/FileSaver.js"></script>
-    <script src="../../plugins/TableExport/dist-5.0.0-rc.11/js/tableexport.js"></script>
+    <script src="../../plugins/tableExport.js"></script>
+    <script src="../../plugins/bootstrap-table/dist-1.11.1/extensions/export/bootstrap-table-export.js"></script>
+    <style type="text/css">
+        table td {
+
+        }
+    </style>
+
     <script>
+        var $table;
         $(function () {
-            $.getJSON('/bootstrap-table-export-demo/resource/data.json', function (result) {
-                initBootstrapTable(result);
-                $("#tb_departments").tableExport();
-            }).then(function () {
-//                $("#tb_departments").tableExport();
+            var $table = $('#tb_departments');
+            $('#btn_exprot').click(function () {
+                $table.bootstrapTable('togglePagination');
+                $table.tableExport({
+                    type: 'excel',
+                    escape: false,
+                    ignoreColumn: [0]
+                });
+                $table.bootstrapTable('togglePagination');
             });
 
+
+            $.getJSON('../../resource/data.json', function (result) {
+                initBootstrapTable(result);
+            });
+
+
             function initBootstrapTable(jsonArray) {
-                $('#tb_departments').bootstrapTable({
+                $table = $('#tb_departments').bootstrapTable({
                     data: jsonArray,
+//                    url: '../../resource/data.json',
                     toolbar: '#toolbar',                //工具按钮用哪个容器
                     striped: true,                      //是否显示行间隔色
                     cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
                     pagination: true,                   //是否显示分页（*）
                     sortable: true,                     //是否启用排序
+                    search: true,
                     sortOrder: "asc",                   //排序方式
                     sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
                     pageNumber: 1,                       //初始化加载第一页，默认第一页
                     pageSize: 10,                       //每页的记录行数（*）
                     pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
-                    clickToSelect:true,
+                    clickToSelect: true,
                     showExport: true,                     //是否显示导出
                     exportDataType: "all",              //basic', 'all', 'selected'.
+                    exportTypes: ['excel'],
+                    exportOptions:{
+                        ignoreColumn: [0]
+                    },
+                    rowStyle: function (row, index) {
+                        var strclass = "";
+                        console.log(row);
+                        if (row.outWeight === undefined) {
+                            strclass = 'info';//还有一个active
+                        }
+                        return {classes: strclass}
+                    },
                     columns: [
                         {
                             checkbox: true
